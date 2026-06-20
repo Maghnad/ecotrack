@@ -282,3 +282,46 @@ select option { background: var(--bg-color); }
     outline: 2px solid var(--accent-glow);
     outline-offset: 2px;
 }
+
+/* -------------------------------------------------------------------------
+   Advanced Accessibility (WCAG AAA Features)
+   ------------------------------------------------------------------------- */
+
+/* Skip to Main Content Link */
+.skip-link {
+    position: absolute;
+    top: -40px;
+    left: 0;
+    background: var(--accent-glow);
+    color: #000;
+    padding: 8px 16px;
+    z-index: 9999;
+    font-weight: bold;
+    text-decoration: none;
+    transition: top 0.3s;
+}
+.skip-link:focus {
+    top: 0;
+}
+
+/* Reduced Motion Preference */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* Windows High Contrast / Forced Colors Mode */
+@media (forced-colors: active) {
+    .glass, .card, .btn {
+        border: 1px solid ButtonText !important;
+        background: Canvas !important;
+    }
+    .text-glow {
+        text-shadow: none !important;
+        color: CanvasText !important;
+    }
+}

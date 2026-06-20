@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
     <!-- Login Overlay -->
     <div id="login-overlay" class="overlay">
         <div class="card glass login-card">
@@ -47,7 +48,7 @@
         </div>
     </nav>
 
-    <main class="content">
+    <main id="main-content" class="content">
         
         <!-- DASHBOARD TAB -->
         <div id="tab-dashboard" class="tab-content active" role="tabpanel" aria-label="Dashboard">
@@ -89,7 +90,7 @@
                         </div>
                         <button type="submit" class="btn primary-btn">Log Action & Earn XP</button>
                     </form>
-                    <div id="action-result" class="result hidden"></div>
+                    <div id="action-result" class="result hidden" aria-live="polite" aria-atomic="true"></div>
                 </section>
 
                 <!-- AI Insights -->
@@ -97,7 +98,7 @@
                     <h2>Gemini AI Insights</h2>
                     <button id="get-insight-btn" class="btn ai-btn">Generate Tip</button>
                     <div id="ai-loading" class="hidden">Gemini is thinking...</div>
-                    <div id="insight-box" class="insight-content hidden">
+                    <div id="insight-box" class="insight-content hidden" aria-live="polite" aria-atomic="true">
                         <div class="tip-card">
                             <p id="ai-tip">Your tip will appear here.</p>
                         </div>
