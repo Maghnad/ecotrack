@@ -10,6 +10,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the entire backend app
 COPY app /app/app
+COPY frontend /app/frontend
 
 # Set the port to be configurable by Cloud Run
 ENV PORT=8000
