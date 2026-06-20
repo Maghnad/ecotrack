@@ -23,7 +23,7 @@ _FALLBACK_TIPS = [
 ]
 
 
-def generate_ai_insights(uid: str, recent_logs: list[dict], category: str = None) -> dict:
+def generate_ai_insights(uid: str, recent_logs: list[dict], category: str | None = None) -> dict:
     """
     Analyses the user's recent footprint logs and returns personalised insights.
     Uses Gemini 1.5 Flash in production; returns structured fallback data in testing.
@@ -82,7 +82,7 @@ def chat_with_gemini(uid: str, message: str) -> dict:
         return {"reply": "Sorry, AI is offline.", "carbon_emissions_kg": 0.0, "message": "Error"}
 
 
-def _build_gemini_prompt(logs: list[dict], category: str = None) -> str:
+def _build_gemini_prompt(logs: list[dict], category: str | None = None) -> str:
     log_summary = "\n".join(
         f"- {log.get('log_type', 'commute')}: {log.get('carbon_emissions_kg', 0):.3f} kg CO₂"
         f" ({log.get('transport_mode', log.get('meal_type', 'unknown'))})"
@@ -136,7 +136,7 @@ def _estimate_potential_savings(logs: list[dict]) -> float:
     return round(total * 0.15, 2)
 
 
-def _build_mock_insight(logs: list[dict], category: str = None) -> dict:
+def _build_mock_insight(logs: list[dict], category: str | None = None) -> dict:
     tips = _FALLBACK_TIPS[:3]
     if category == "diet":
         tips = ["Try going meatless on Mondays.", "Choose local produce."] + tips[:1]

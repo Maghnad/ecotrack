@@ -34,7 +34,7 @@ app = FastAPI(
 # Configure Rate Limiter (100 requests per minute)
 limiter = Limiter(key_func=get_remote_address, default_limits=["100/minute"])
 app.state.limiter = limiter
-app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)  # type: ignore
 
 # Configure JSON Audit Logger for SIEM integration
 audit_logger = logging.getLogger("audit_log")

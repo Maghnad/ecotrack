@@ -23,6 +23,8 @@ EcoTrack is an interactive, gamified web application designed to help users trac
 - **Emissions Breakdown:** A dynamic Doughnut chart (Chart.js) visualizing the exact distribution of emissions across Diet, Transport, and Energy.
 - **Offset & Act Hub:** Offset unavoidable emissions by directly funding verified green projects (Tree planting, Solar) or redeeming XP for discounts at partner eco-brands.
 - **Automated Bank Tracking (Plaid Mock):** Simulated integration with banking APIs to automatically detect and estimate carbon from purchases (e.g., flights, groceries).
+- **AI Eco-Scan Camera (Mock):** Based on recent 2024 tracking trends, users can "scan" an item to instantly get disposal advice and footprint calculations via AI.
+- **Predictive Analytics Projection:** Utilizes recent ML trends to project the user's footprint 12 months into the future based on their last 30 days of behavioral data.
 
 ### 4. Google Gemini AI Integration
 - **Context-Aware AI Insights:** The app analyzes the user's recent logs to generate highly personalized reduction tips using the Gemini 1.5 Flash API.

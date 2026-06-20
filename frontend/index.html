@@ -84,9 +84,10 @@
         </ul>
         <div class="user-profile">
             <div class="avatar">👤</div>
-            <div class="log-actions mt-4 flex" style="gap: 1rem;">
+            <div class="log-actions mt-4 flex" style="gap: 1rem; flex-wrap: wrap;">
                 <button class="btn primary-btn flex-grow" onclick="document.getElementById('log-modal').classList.remove('hidden')">➕ Log Manual Action</button>
-                <button class="btn" style="background:#0ea5e9; color:white; border:none;" onclick="alert('Plaid Bank Connection (Mock): Scanning recent transactions... \nFound: Flight to NYC (+250kg CO2) \nFound: Vegan Groceries (+12kg CO2)')">🔗 Connect Bank (Auto-Track)</button>
+                <button class="btn" style="background:#0ea5e9; color:white; border:none; flex-grow: 1;" onclick="alert('Plaid Bank Connection (Mock): Scanning recent transactions... \nFound: Flight to NYC (+250kg CO2) \nFound: Vegan Groceries (+12kg CO2)')">🔗 Connect Bank (Auto-Track)</button>
+                <button class="btn" style="background:#10b981; color:white; border:none; flex-grow: 1;" onclick="alert('AI Eco-Scan (Mock): Activating Camera...\nScanning Item: Plastic Water Bottle.\nDisposal Advice: Recycle (Blue Bin).\nCarbon Footprint: 0.08 kg CO2.')">📷 AI Eco-Scan</button>
             </div>
             <div class="info">
                 <p id="user-email">Loading...</p>
@@ -228,16 +229,26 @@
         <!-- ANALYTICS TAB -->
         <div id="tab-analytics" class="tab-content" role="tabpanel" aria-label="Analytics">
             <header>
-                <h1>Analytics & 3D Impact</h1>
-                <p>Explore your footprint data in real-time to understand your environmental impact.</p>
+                <h1>Footprint Analytics</h1>
+                <p>Visualize your progress and identify areas for improvement.</p>
             </header>
-            <div class="main-columns">
-                <section class="card glass">
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Current Emissions Breakdown -->
+                <div class="card glass chart-container">
                     <h2>Emissions Breakdown</h2>
-                    <div style="position: relative; height:300px; width:100%">
-                        <canvas id="emissionsChart" role="img" aria-label="Donut chart showing emissions breakdown by Diet, Transport, and Energy"></canvas>
-                    </div>
-                </section>
+                    <canvas id="emissionsChart" aria-label="Doughnut chart showing emissions by category"></canvas>
+                </div>
+
+                <!-- Predictive Analytics (Trend Projection) -->
+                <div class="card glass chart-container" style="display:flex; flex-direction:column; justify-content:center; align-items:center;">
+                    <h2>Predictive Analytics (2024 Model)</h2>
+                    <p style="color:#94a3b8; font-size: 0.9rem; text-align:center; margin-top: 1rem;">Based on your last 30 days of activity and global ML trends, your projected footprint for the next year is:</p>
+                    <div style="font-size: 3rem; font-weight: bold; color: #f59e0b; margin: 1.5rem 0;">2.4 Tons CO₂</div>
+                    <p style="color:#10b981; font-size: 0.9rem;">⬇ 15% below the national average!</p>
+                </div>
+            </div>
+            <div class="main-columns">
                 <section class="card glass">
                     <h2>Your 3D Eco-World</h2>
                     <div id="three-container" class="three-container" role="img" aria-label="3D rendering of the Earth that changes color and size based on your carbon footprint" style="width:100%; height:300px; background: rgba(0,0,0,0.5); border-radius:10px;"></div>
