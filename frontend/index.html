@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EcoTrack v2 - Gamified Carbon Footprint</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Login Overlay -->
+    <div id="login-overlay" class="overlay">
+        <div class="card glass login-card">
+            <h2>Welcome to EcoTrack</h2>
+            <p>Enter your Eco-Warrior name to join the global leaderboard!</p>
+            <form id="login-form">
+                <div class="input-group">
+                    <input type="text" id="login-username" placeholder="e.g. EarthSaver99" required autocomplete="off">
+                </div>
+                <button type="submit" class="btn primary-btn">Enter Game</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="background-effects">
+        <div class="glow-orb orb-1"></div>
+        <div class="glow-orb orb-2"></div>
+        <div class="glow-orb orb-3"></div>
+    </div>
+
+    <!-- Sidebar Navigation -->
+    <nav class="sidebar glass">
+        <h2>EcoTrack</h2>
+        <ul>
+            <li class="active" onclick="switchTab('dashboard')">🏠 Dashboard</li>
+            <li onclick="switchTab('challenges')">🎯 Challenges</li>
+            <li onclick="switchTab('leaderboard')">🏆 Leaderboard</li>
+        </ul>
+        <div class="user-profile">
+            <div class="avatar">👤</div>
+            <div class="info">
+                <p id="user-email">Loading...</p>
+                <p id="user-level" class="level-badge">Lvl 1</p>
+            </div>
+        </div>
+    </nav>
+
+    <main class="content">
+        
+        <!-- DASHBOARD TAB -->
+        <div id="tab-dashboard" class="tab-content active">
+            <header>
+                <h1>Welcome Back!</h1>
+                <p>Track your footprint, earn XP, and save the planet.</p>
+            </header>
+
+            <div class="stats-row">
+                <div class="card glass stat-card">
+                    <h3>Total XP</h3>
+                    <p id="stat-xp" class="stat-value text-glow">0</p>
+                </div>
+                <div class="card glass stat-card">
+                    <h3>Total Footprint</h3>
+                    <p id="stat-emissions" class="stat-value text-red">0 kg CO₂</p>
+                </div>
+                <div class="card glass stat-card">
+                    <h3>Badges Earned</h3>
+                    <p id="stat-badges" class="stat-value">0</p>
+                </div>
+            </div>
+
+            <div class="main-columns">
+                <!-- Log Action -->
+                <section class="card glass">
+                    <h2>Log Sustainable Action</h2>
+                    <form id="action-form">
+                        <div class="input-group">
+                            <label for="action-type">Action</label>
+                            <select id="action-type">
+                                <option value="used_reusable_bag">Used a Reusable Bag</option>
+                                <option value="planted_tree">Planted a Tree</option>
+                                <option value="avoided_meat">Had a Meatless Meal</option>
+                                <option value="used_public_transport">Took Public Transit</option>
+                                <option value="reduced_heating">Reduced Heating/AC</option>
+                                <option value="air_dried_laundry">Air-Dried Laundry</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn primary-btn">Log Action & Earn XP</button>
+                    </form>
+                    <div id="action-result" class="result hidden"></div>
+                </section>
+
+                <!-- AI Insights -->
+                <section class="card glass ai-section">
+                    <h2>Gemini AI Insights</h2>
+                    <button id="get-insight-btn" class="btn ai-btn">Generate Tip</button>
+                    <div id="ai-loading" class="hidden">Gemini is thinking...</div>
+                    <div id="insight-box" class="insight-content hidden">
+                        <div class="tip-card">
+                            <p id="ai-tip">Your tip will appear here.</p>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+
+        <!-- CHALLENGES TAB -->
+        <div id="tab-challenges" class="tab-content">
+            <header>
+                <h1>Weekly Challenges</h1>
+                <p>Complete challenges before the week ends for bonus XP!</p>
+            </header>
+            <div id="challenges-container" class="challenges-grid">
+                <!-- Injected via JS -->
+            </div>
+        </div>
+
+        <!-- LEADERBOARD TAB -->
+        <div id="tab-leaderboard" class="tab-content">
+            <header>
+                <h1>Global Leaderboard</h1>
+                <p>See who is leading the charge against climate change.</p>
+            </header>
+            <div class="card glass leaderboard-card">
+                <table class="leaderboard-table">
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>User</th>
+                            <th>Level</th>
+                            <th>XP</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaderboard-body">
+                        <!-- Injected via JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+
+    <script src="app.js"></script>
+</body>
+</html>
