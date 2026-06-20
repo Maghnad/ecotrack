@@ -36,7 +36,12 @@ app.include_router(users.router)
 app.include_router(actions.router)
 
 
+from fastapi.staticfiles import StaticFiles
+
 @app.get("/health", tags=["System"])
 async def health_check() -> dict:
     """Public health check. Returns service status and version."""
     return {"status": "ok", "service": "ecotrack-api", "version": "2.0.0"}
+
+# Mount the frontend UI
+app.mount("/", StaticFiles(directory="frontend", html=True), name="frontend")
