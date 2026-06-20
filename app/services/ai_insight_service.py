@@ -140,7 +140,6 @@ def _build_mock_insight(logs: list[dict], category: str = None) -> dict:
         tips = ["Walk short distances.", "Carpool to work."] + tips[:1]
         
     return {
-        "uid": uid,
         "tips": tips,
         "weekly_summary": _summarise_logs(logs),
         "biggest_emission_source": _find_biggest_source(logs),
