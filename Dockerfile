@@ -15,4 +15,4 @@ COPY app /app/app
 ENV PORT=8000
 
 # Run the FastAPI application using Uvicorn
-CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.1 --port ${PORT}"]
+CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port ${PORT}"]
