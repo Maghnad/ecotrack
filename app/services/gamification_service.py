@@ -3,12 +3,13 @@ EcoTrack - Gamification Service
 Handles XP, levelling up, streaks, and badge unlocks.
 This is the engine that makes EcoTrack addictive (in a good way).
 """
+
 from __future__ import annotations
-from datetime import datetime, date, timedelta
-from typing import Optional
+
+from datetime import date, timedelta, datetime
+
 from app.core.config import get_settings
 from app.services import database_service as db
-from app.models.schemas import Badge
 
 settings = get_settings()
 
@@ -173,7 +174,10 @@ def award_xp_and_update_streak(uid: str, xp_to_add: int) -> dict:
         "xp_awarded": xp_to_add,
         "streak_days": streak_days,
         "level": new_level,
-        "level_name": level_names[new_level] if new_level < len(level_names) else "EcoChampion",
+        "level_name": (
+            level_names[new_level] if new_level < len(
+                level_names) else "EcoChampion"
+        ),
         "xp_to_next_level": xp_to_next,
         "newly_earned_badges": newly_earned_badges,
     }
@@ -183,7 +187,10 @@ def record_carbon_saved(uid: str, carbon_saved_kg: float) -> None:
     """Adds to the user's cumulative carbon savings (for eco-actions)."""
     profile = db.ensure_user_exists(uid, None)
     current_saved = profile.get("total_carbon_saved_kg", 0.0)
-    db.upsert_user_profile(uid, {"total_carbon_saved_kg": round(current_saved + carbon_saved_kg, 4)})
+    db.upsert_user_profile(
+        uid, {"total_carbon_saved_kg": round(
+            current_saved + carbon_saved_kg, 4)}
+    )
 
 
 def check_zero_commute_badge(uid: str, transport_mode: str) -> None:
@@ -193,7 +200,8 @@ def check_zero_commute_badge(uid: str, transport_mode: str) -> None:
         existing_badges = [b["badge_id"] for b in profile.get("badges", [])]
         if "zero_commute" not in existing_badges:
             badge = _make_badge_from_definition(
-                next(b for b in BADGE_DEFINITIONS if b["badge_id"] == "zero_commute")
+                next(
+                    b for b in BADGE_DEFINITIONS if b["badge_id"] == "zero_commute")
             )
             all_badges = profile.get("badges", []) + [badge]
             db.upsert_user_profile(uid, {"badges": all_badges})
@@ -202,6 +210,7 @@ def check_zero_commute_badge(uid: str, transport_mode: str) -> None:
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def _calculate_level(total_xp: int, thresholds: list[int]) -> int:
     level = 0
@@ -238,7 +247,10 @@ def _evaluate_badges(uid: str, profile: dict, extra_flags: list[str]) -> list[di
             earned = True
         elif condition == "level" and profile.get("level", 0) >= threshold:
             earned = True
-        elif condition == "carbon_saved" and profile.get("total_carbon_saved_kg", 0.0) >= threshold:
+        elif (
+            condition == "carbon_saved"
+            and profile.get("total_carbon_saved_kg", 0.0) >= threshold
+        ):
             earned = True
         elif condition == "special" and badge_id in extra_flags:
             earned = True

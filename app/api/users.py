@@ -2,12 +2,14 @@
 EcoTrack - User & Gamification Router
 Profile, leaderboard, XP, badges, and streaks.
 """
+
 from fastapi import APIRouter, Depends, Query
-from app.core.security import get_current_user
+
 from app.core.config import get_settings
-from app.models.schemas import UserProfile, Badge, LeaderboardResponse, LeaderboardEntry
-from app.services import database_service as db
+from app.core.security import get_current_user
+from app.models.schemas import Badge, LeaderboardEntry, LeaderboardResponse, UserProfile
 from app.services import analytics_service as analytics
+from app.services import database_service as db
 
 router = APIRouter(prefix="/users", tags=["Users & Gamification"])
 settings = get_settings()
@@ -53,7 +55,8 @@ async def get_my_profile(
         display_name=profile.get("display_name"),
         total_xp=total_xp,
         level=level,
-        level_name=level_names[level] if level < len(level_names) else "EcoChampion",
+        level_name=level_names[level] if level < len(
+            level_names) else "EcoChampion",
         xp_to_next_level=xp_to_next,
         streak_days=profile.get("streak_days", 0),
         longest_streak=profile.get("longest_streak", 0),
@@ -77,7 +80,9 @@ async def update_display_name(
 
 @router.get("/leaderboard", response_model=LeaderboardResponse)
 async def get_leaderboard(
-    limit: int = Query(default=10, ge=1, le=50, description="Number of top users to return."),
+    limit: int = Query(
+        default=10, ge=1, le=50, description="Number of top users to return."
+    ),
     current_user: dict = Depends(get_current_user),
 ) -> LeaderboardResponse:
     """
@@ -85,7 +90,8 @@ async def get_leaderboard(
     even if they fall outside the top N.
     """
     uid = current_user["uid"]
-    leaderboard_data = analytics.get_leaderboard_with_user_rank(uid, limit=limit)
+    leaderboard_data = analytics.get_leaderboard_with_user_rank(
+        uid, limit=limit)
 
     entries = [
         LeaderboardEntry(

@@ -3,8 +3,10 @@ EcoTrack - Security & Authentication
 Validates Firebase JWT tokens on every protected route.
 In testing/mock mode, accepts a dummy token for local development.
 """
+
 from fastapi import HTTPException, Security, status
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+
 from app.core.config import get_settings
 
 settings = get_settings()
@@ -38,6 +40,7 @@ async def get_current_user(
     # --- Production: validate with Firebase Admin SDK ---
     try:
         import firebase_admin.auth as fb_auth
+
         decoded = fb_auth.verify_id_token(token)
         return {"uid": decoded["uid"], "email": decoded.get("email")}
     except Exception:

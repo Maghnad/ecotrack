@@ -2,9 +2,12 @@
 EcoTrack - Main Application Entry Point
 Assembles all routers and starts the FastAPI app.
 """
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.api import footprint, users, actions
+from fastapi.staticfiles import StaticFiles
+
+from app.api import actions, footprint, users
 
 app = FastAPI(
     title="EcoTrack API",
@@ -36,12 +39,11 @@ app.include_router(users.router)
 app.include_router(actions.router)
 
 
-from fastapi.staticfiles import StaticFiles
-
 @app.get("/health", tags=["System"])
 async def health_check() -> dict:
     """Public health check. Returns service status and version."""
     return {"status": "ok", "service": "ecotrack-api", "version": "2.0.0"}
+
 
 # Mount the frontend UI
 app.mount("/", StaticFiles(directory="frontend", html=True), name="frontend")

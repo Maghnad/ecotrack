@@ -3,9 +3,12 @@ EcoTrack - Firestore Database Service
 All read/write operations are encapsulated here.
 The rest of the app never touches Firestore directly.
 """
+
 from __future__ import annotations
-from datetime import datetime, date, timedelta
-from typing import Optional
+
+from datetime import datetime, timedelta
+from typing import Optional, Any
+
 from app.core.config import get_settings
 
 settings = get_settings()
@@ -26,6 +29,7 @@ def _get_firestore_client():
         return None
     import firebase_admin
     from firebase_admin import firestore as fs
+
     if not firebase_admin._apps:
         firebase_admin.initialize_app()
     return fs.client()
@@ -34,6 +38,7 @@ def _get_firestore_client():
 # ---------------------------------------------------------------------------
 # User profile helpers
 # ---------------------------------------------------------------------------
+
 
 def get_user_profile(uid: str) -> Optional[dict]:
     if settings.environment == "testing":
@@ -59,7 +64,7 @@ def ensure_user_exists(uid: str, email: Optional[str]) -> dict:
     if profile:
         return profile
     now = datetime.utcnow().isoformat()
-    new_profile = {
+    new_profile: dict[str, Any] = {
         "uid": uid,
         "email": email,
         "display_name": email.split("@")[0] if email else "EcoUser",
@@ -80,6 +85,7 @@ def ensure_user_exists(uid: str, email: Optional[str]) -> dict:
 # Footprint log helpers
 # ---------------------------------------------------------------------------
 
+
 def save_footprint_log(uid: str, log_data: dict) -> str:
     """Persist a footprint log entry and return its auto-generated ID."""
     log_id = f"log_{uid}_{datetime.utcnow().timestamp():.0f}"
@@ -93,7 +99,12 @@ def save_footprint_log(uid: str, log_data: dict) -> str:
         return log_id
 
     db = _get_firestore_client()
-    ref = db.collection("footprint_logs").document(uid).collection("logs").document(log_id)
+    ref = (
+        db.collection("footprint_logs")
+        .document(uid)
+        .collection("logs")
+        .document(log_id)
+    )
     ref.set(log_data)
     return log_id
 
@@ -105,7 +116,9 @@ def get_user_logs(uid: str, days: int = 7) -> list[dict]:
     if settings.environment == "testing":
         collection_key = f"footprint_logs/{uid}"
         logs = list(_mock_collection(collection_key).values())
-        return [l for l in logs if l.get("logged_at", "") >= cutoff]
+        return [
+            log_entry for log_entry in logs if log_entry.get("logged_at", "") >= cutoff
+        ]
 
     db = _get_firestore_client()
     docs = (
@@ -122,6 +135,7 @@ def get_user_logs(uid: str, days: int = 7) -> list[dict]:
 # Leaderboard helpers
 # ---------------------------------------------------------------------------
 
+
 def get_leaderboard(limit: int = 10) -> list[dict]:
     """Return top users by XP."""
     if settings.environment == "testing":
@@ -129,7 +143,12 @@ def get_leaderboard(limit: int = 10) -> list[dict]:
         return sorted(users, key=lambda u: u.get("total_xp", 0), reverse=True)[:limit]
 
     db = _get_firestore_client()
-    docs = db.collection("users").order_by("total_xp", direction="DESCENDING").limit(limit).stream()
+    docs = (
+        db.collection("users")
+        .order_by("total_xp", direction="DESCENDING")
+        .limit(limit)
+        .stream()
+    )
     return [d.to_dict() for d in docs]
 
 
@@ -137,13 +156,16 @@ def get_leaderboard(limit: int = 10) -> list[dict]:
 # Challenge helpers
 # ---------------------------------------------------------------------------
 
+
 def save_challenge_progress(uid: str, challenge_id: str, progress: dict) -> None:
     key = f"challenge_progress/{uid}/{challenge_id}"
     if settings.environment == "testing":
         _MOCK_DB[key] = progress
         return
     db = _get_firestore_client()
-    db.collection("challenge_progress").document(uid).collection("challenges").document(challenge_id).set(progress)
+    db.collection("challenge_progress").document(uid).collection("challenges").document(
+        challenge_id
+    ).set(progress)
 
 
 def get_challenge_progress(uid: str, challenge_id: str) -> Optional[dict]:
@@ -151,5 +173,11 @@ def get_challenge_progress(uid: str, challenge_id: str) -> Optional[dict]:
     if settings.environment == "testing":
         return _MOCK_DB.get(key)
     db = _get_firestore_client()
-    doc = db.collection("challenge_progress").document(uid).collection("challenges").document(challenge_id).get()
+    doc = (
+        db.collection("challenge_progress")
+        .document(uid)
+        .collection("challenges")
+        .document(challenge_id)
+        .get()
+    )
     return doc.to_dict() if doc.exists else None

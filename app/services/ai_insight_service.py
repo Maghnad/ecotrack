@@ -3,8 +3,11 @@ EcoTrack - AI Insight Service (Google Gemini)
 Generates personalised, context-aware reduction tips from the user's
 recent activity log using the Gemini generative AI model.
 """
+
 from __future__ import annotations
+
 from datetime import datetime
+
 from app.core.config import get_settings
 from app.core.secrets import get_secret
 
@@ -32,12 +35,14 @@ def generate_ai_insights(uid: str, recent_logs: list[dict]) -> dict:
 
     try:
         import google.generativeai as genai
+
         api_key = get_secret("gemini_api_key")
         genai.configure(api_key=api_key)
         model = genai.GenerativeModel("gemini-1.5-flash")
         response = model.generate_content(prompt)
         tips_text = response.text.strip()
-        tips = [t.strip("- ").strip() for t in tips_text.split("\n") if t.strip()]
+        tips = [t.strip("- ").strip()
+                for t in tips_text.split("\n") if t.strip()]
         return {
             "tips": tips[:5],
             "weekly_summary": _summarise_logs(recent_logs),
@@ -72,10 +77,11 @@ Based on this data:
 
 
 def _summarise_logs(logs: list[dict]) -> str:
-    total_kg = sum(l.get("carbon_emissions_kg", 0) for l in logs)
+    total_kg = sum(log_entry.get("carbon_emissions_kg", 0)
+                   for log_entry in logs)
     if not logs:
         return "No activity logged yet this week."
-    days = len(set(l.get("logged_at", "")[:10] for l in logs))
+    days = len(set(log_entry.get("logged_at", "")[:10] for log_entry in logs))
     return (
         f"This week you logged {days} day(s) of activity, "
         f"totalling {total_kg:.2f} kg CO₂."
@@ -86,10 +92,11 @@ def _find_biggest_source(logs: list[dict]) -> str:
     categories: dict[str, float] = {}
     for log in logs:
         cat = log.get("log_type", "commute")
-        categories[cat] = categories.get(cat, 0) + log.get("carbon_emissions_kg", 0)
+        categories[cat] = categories.get(
+            cat, 0) + log.get("carbon_emissions_kg", 0)
     if not categories:
         return "None yet"
-    return max(categories, key=categories.get)
+    return max(categories, key=lambda k: categories[k])
 
 
 def _estimate_potential_savings(logs: list[dict]) -> float:
@@ -97,7 +104,7 @@ def _estimate_potential_savings(logs: list[dict]) -> float:
     Simple heuristic: estimate 15% reduction if the user optimises their
     single biggest emission category.
     """
-    total = sum(l.get("carbon_emissions_kg", 0) for l in logs)
+    total = sum(log_entry.get("carbon_emissions_kg", 0) for log_entry in logs)
     return round(total * 0.15, 2)
 
 

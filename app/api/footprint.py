@@ -2,24 +2,31 @@
 EcoTrack - Footprint Logging Router
 Handles commute, diet, and energy emission logging.
 """
+
 from fastapi import APIRouter, Depends, HTTPException, status
-from app.core.security import get_current_user
+
 from app.core.config import get_settings
+from app.core.security import get_current_user
 from app.models.schemas import (
-    CommuteLogRequest, CommuteLogResponse,
-    DietLogRequest, DietLogResponse,
-    EnergyLogRequest, EnergyLogResponse,
+    CommuteLogRequest,
+    CommuteLogResponse,
+    DietLogRequest,
+    DietLogResponse,
+    EnergyLogRequest,
+    EnergyLogResponse,
 )
 from app.services import calculation_service as calc
+from app.services import challenge_service as cs
 from app.services import database_service as db
 from app.services import gamification_service as gs
-from app.services import challenge_service as cs
 
 router = APIRouter(prefix="/footprint", tags=["Footprint Logging"])
 settings = get_settings()
 
 
-@router.post("/commute", response_model=CommuteLogResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/commute", response_model=CommuteLogResponse, status_code=status.HTTP_201_CREATED
+)
 async def log_commute(
     request: CommuteLogRequest,
     current_user: dict = Depends(get_current_user),
@@ -38,7 +45,9 @@ async def log_commute(
             transport_mode=request.transport_mode,
         )
     except ValueError as exc:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc))
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)
+        )
 
     log_entry = {
         "log_type": "commute",
@@ -52,7 +61,8 @@ async def log_commute(
     log_id = db.save_footprint_log(uid, log_entry)
 
     # Award XP and update streak
-    xp_result = gs.award_xp_and_update_streak(uid, settings.xp_per_footprint_log)
+    xp_result = gs.award_xp_and_update_streak(
+        uid, settings.xp_per_footprint_log)
 
     # Check for zero-emission commuter badge
     gs.check_zero_commute_badge(uid, request.transport_mode)
@@ -61,7 +71,9 @@ async def log_commute(
     cs.check_and_award_challenge_completion(uid)
 
     # Build a motivational message
-    message = _build_commute_message(emission_data["carbon_emissions_kg"], request.transport_mode)
+    message = _build_commute_message(
+        emission_data["carbon_emissions_kg"], request.transport_mode
+    )
 
     return CommuteLogResponse(
         log_id=log_id,
@@ -75,7 +87,9 @@ async def log_commute(
     )
 
 
-@router.post("/diet", response_model=DietLogResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/diet", response_model=DietLogResponse, status_code=status.HTTP_201_CREATED
+)
 async def log_diet(
     request: DietLogRequest,
     current_user: dict = Depends(get_current_user),
@@ -87,8 +101,11 @@ async def log_diet(
     uid = current_user["uid"]
     db.ensure_user_exists(uid, current_user.get("email"))
 
-    carbon_emissions_kg = calc.calculate_diet_emissions(request.meal_type, request.servings)
-    driving_equivalent = calc.emissions_to_driving_equivalent_km(carbon_emissions_kg)
+    carbon_emissions_kg = calc.calculate_diet_emissions(
+        request.meal_type, request.servings
+    )
+    driving_equivalent = calc.emissions_to_driving_equivalent_km(
+        carbon_emissions_kg)
 
     log_entry = {
         "log_type": "diet",
@@ -99,7 +116,8 @@ async def log_diet(
     }
     log_id = db.save_footprint_log(uid, log_entry)
 
-    xp_result = gs.award_xp_and_update_streak(uid, settings.xp_per_footprint_log)
+    xp_result = gs.award_xp_and_update_streak(
+        uid, settings.xp_per_footprint_log)
     cs.check_and_award_challenge_completion(uid)
 
     comparison = (
@@ -118,7 +136,9 @@ async def log_diet(
     )
 
 
-@router.post("/energy", response_model=EnergyLogResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/energy", response_model=EnergyLogResponse, status_code=status.HTTP_201_CREATED
+)
 async def log_energy(
     request: EnergyLogRequest,
     current_user: dict = Depends(get_current_user),
@@ -144,7 +164,8 @@ async def log_energy(
     }
     log_id = db.save_footprint_log(uid, log_entry)
 
-    xp_result = gs.award_xp_and_update_streak(uid, settings.xp_per_footprint_log)
+    xp_result = gs.award_xp_and_update_streak(
+        uid, settings.xp_per_footprint_log)
     cs.check_and_award_challenge_completion(uid)
 
     return EnergyLogResponse(
@@ -163,5 +184,7 @@ def _build_commute_message(carbon_kg: float, mode: str) -> str:
     if mode == "transit":
         return f"Smart choice! Public transport emitted just {carbon_kg:.2f} kg CO₂ — much better than driving solo. 🌿"
     if carbon_kg < 1.0:
-        return f"Short trip with just {carbon_kg:.2f} kg CO₂ logged. Every bit counts! 💚"
+        return (
+            f"Short trip with just {carbon_kg:.2f} kg CO₂ logged. Every bit counts! 💚"
+        )
     return f"Logged {carbon_kg:.2f} kg CO₂. Consider transit or carpooling next time to cut this in half. 🌍"

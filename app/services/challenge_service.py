@@ -3,11 +3,14 @@ EcoTrack - Weekly Challenge Service
 Auto-generates weekly challenges and tracks user progress.
 Challenges reset every Monday and are the same for all users (social).
 """
+
 from __future__ import annotations
-from datetime import datetime, date, timedelta
+
+from datetime import date, timedelta
+
 from app.core.config import get_settings
-from app.services import database_service as db
 from app.models.schemas import Challenge
+from app.services import database_service as db
 
 settings = get_settings()
 
@@ -88,9 +91,11 @@ def get_current_week_challenges() -> list[dict]:
     """
     week_number = date.today().isocalendar()[1]
     start_index = (week_number * 3) % len(CHALLENGE_POOL)
-    indices = [start_index % len(CHALLENGE_POOL),
-               (start_index + 1) % len(CHALLENGE_POOL),
-               (start_index + 2) % len(CHALLENGE_POOL)]
+    indices = [
+        start_index % len(CHALLENGE_POOL),
+        (start_index + 1) % len(CHALLENGE_POOL),
+        (start_index + 2) % len(CHALLENGE_POOL),
+    ]
     selected = [CHALLENGE_POOL[i] for i in indices]
     deadline = _get_week_end_date()
     return [{**c, "deadline_date": deadline} for c in selected]
@@ -112,7 +117,10 @@ def get_user_challenge_status(uid: str) -> dict:
         target = challenge["target_value"]
         progress_value = progress_map.get(metric, 0.0)
         is_completed = progress_value >= target
-        progress_percent = round(min(progress_value / target, 1.0) * 100, 1) if target > 0 else 0
+        progress_percent = (
+            round(min(progress_value / target, 1.0)
+                  * 100, 1) if target > 0 else 0
+        )
 
         enriched = Challenge(
             challenge_id=challenge["challenge_id"],
@@ -143,6 +151,7 @@ def check_and_award_challenge_completion(uid: str) -> list[dict]:
     Returns list of newly completed challenges.
     """
     from app.services import gamification_service as gs
+
     status = get_user_challenge_status(uid)
     newly_completed = []
 
@@ -167,6 +176,7 @@ def check_and_award_challenge_completion(uid: str) -> list[dict]:
 # ---------------------------------------------------------------------------
 # Progress calculation from raw logs
 # ---------------------------------------------------------------------------
+
 
 def _calculate_progress_from_logs(logs: list[dict]) -> dict[str, float]:
     """Derives all possible challenge metrics from a list of log dicts."""

@@ -2,11 +2,14 @@
 EcoTrack - Analytics Service
 Aggregates raw logs into per-day and per-period summaries.
 """
+
 from __future__ import annotations
-from datetime import datetime, date, timedelta
+
 from collections import defaultdict
-from app.services import database_service as db
+from datetime import date, timedelta
+
 from app.models.schemas import DailyEmission, HistoryResponse
+from app.services import database_service as db
 
 # Global average daily CO₂ per person (Our World in Data, 2022): ~16.1 kg/day
 GLOBAL_AVERAGE_DAILY_KG = 16.1
@@ -44,8 +47,12 @@ def get_emissions_history(uid: str, days: int = 30) -> HistoryResponse:
     today = date.today()
     for i in range(days - 1, -1, -1):
         day_str = (today - timedelta(days=i)).isoformat()
-        bucket = daily_buckets.get(day_str, {"transport_kg": 0.0, "diet_kg": 0.0, "energy_kg": 0.0})
-        total = round(bucket["transport_kg"] + bucket["diet_kg"] + bucket["energy_kg"], 4)
+        bucket = daily_buckets.get(
+            day_str, {"transport_kg": 0.0, "diet_kg": 0.0, "energy_kg": 0.0}
+        )
+        total = round(
+            bucket["transport_kg"] + bucket["diet_kg"] + bucket["energy_kg"], 4
+        )
         daily_emissions.append(
             DailyEmission(
                 date=day_str,
@@ -59,10 +66,17 @@ def get_emissions_history(uid: str, days: int = 30) -> HistoryResponse:
     # Period stats
     period_total = round(sum(d.total_kg for d in daily_emissions), 4)
     active_days = sum(1 for d in daily_emissions if d.total_kg > 0)
-    period_average = round(period_total / active_days, 4) if active_days > 0 else 0.0
-    comparison_pct = round(
-        ((period_average - GLOBAL_AVERAGE_DAILY_KG) / GLOBAL_AVERAGE_DAILY_KG) * 100, 1
-    ) if GLOBAL_AVERAGE_DAILY_KG > 0 else 0.0
+    period_average = round(period_total / active_days,
+                           4) if active_days > 0 else 0.0
+    comparison_pct = (
+        round(
+            ((period_average - GLOBAL_AVERAGE_DAILY_KG) / GLOBAL_AVERAGE_DAILY_KG)
+            * 100,
+            1,
+        )
+        if GLOBAL_AVERAGE_DAILY_KG > 0
+        else 0.0
+    )
 
     return HistoryResponse(
         daily_emissions=daily_emissions,
@@ -98,7 +112,8 @@ def get_leaderboard_with_user_rank(current_uid: str, limit: int = 10) -> dict:
 
     # If current user is outside top N, append them at their actual rank
     if current_user_rank and current_user_rank > limit:
-        current_entry = next((e for e in ranked if e["uid"] == current_uid), None)
+        current_entry = next(
+            (e for e in ranked if e["uid"] == current_uid), None)
         if current_entry:
             top_entries.append(current_entry)
 
@@ -110,5 +125,13 @@ def get_leaderboard_with_user_rank(current_uid: str, limit: int = 10) -> dict:
 
 def _uid_to_level_name(user: dict) -> str:
     level = user.get("level", 0)
-    level_names = ["Seedling", "Sprout", "Sapling", "Grove", "Forest", "Rainforest", "EcoChampion"]
+    level_names = [
+        "Seedling",
+        "Sprout",
+        "Sapling",
+        "Grove",
+        "Forest",
+        "Rainforest",
+        "EcoChampion",
+    ]
     return level_names[level] if level < len(level_names) else "EcoChampion"

@@ -3,6 +3,7 @@ EcoTrack - Google Cloud Secret Manager
 Fetches API keys securely at runtime.
 Falls back to .env values in testing/development mode.
 """
+
 from app.core.config import get_settings
 
 settings = get_settings()
@@ -18,6 +19,7 @@ def get_secret(secret_id: str) -> str:
 
     try:
         from google.cloud import secretmanager
+
         client = secretmanager.SecretManagerServiceClient()
         name = f"projects/{settings.project_id}/secrets/{secret_id}/versions/latest"
         response = client.access_secret_version(request={"name": name})

@@ -2,20 +2,24 @@
 EcoTrack - Eco-Actions, Challenges & AI Insights Router
 Quick-log positive actions, view weekly challenges, get AI tips.
 """
+
 from fastapi import APIRouter, Depends, Query
-from app.core.security import get_current_user
+
 from app.core.config import get_settings
+from app.core.security import get_current_user
 from app.models.schemas import (
-    EcoActionRequest, EcoActionResponse,
-    ChallengeListResponse, Challenge,
-    InsightResponse, HistoryResponse,
+    ChallengeListResponse,
+    EcoActionRequest,
+    EcoActionResponse,
+    HistoryResponse,
+    InsightResponse,
 )
-from app.services import calculation_service as calc
-from app.services import database_service as db
-from app.services import gamification_service as gs
-from app.services import challenge_service as cs
 from app.services import ai_insight_service as ai
 from app.services import analytics_service as analytics
+from app.services import calculation_service as calc
+from app.services import challenge_service as cs
+from app.services import database_service as db
+from app.services import gamification_service as gs
 
 router = APIRouter(tags=["Actions, Challenges & Insights"])
 settings = get_settings()
@@ -24,6 +28,7 @@ settings = get_settings()
 # ---------------------------------------------------------------------------
 # Eco-Actions
 # ---------------------------------------------------------------------------
+
 
 @router.post("/eco-actions", response_model=EcoActionResponse, status_code=201)
 async def log_eco_action(
@@ -37,7 +42,9 @@ async def log_eco_action(
     uid = current_user["uid"]
     db.ensure_user_exists(uid, current_user.get("email"))
 
-    action_data = calc.calculate_eco_action_savings(request.action_type, request.quantity)
+    action_data = calc.calculate_eco_action_savings(
+        request.action_type, request.quantity
+    )
 
     log_entry = {
         "log_type": "eco_action",
@@ -52,7 +59,8 @@ async def log_eco_action(
     gs.record_carbon_saved(uid, action_data["carbon_saved_kg"])
 
     # Award XP
-    xp_result = gs.award_xp_and_update_streak(uid, settings.xp_per_footprint_log)
+    xp_result = gs.award_xp_and_update_streak(
+        uid, settings.xp_per_footprint_log)
 
     # Check challenges
     cs.check_and_award_challenge_completion(uid)
@@ -69,6 +77,7 @@ async def log_eco_action(
 # ---------------------------------------------------------------------------
 # Challenges
 # ---------------------------------------------------------------------------
+
 
 @router.get("/challenges", response_model=ChallengeListResponse)
 async def get_challenges(
@@ -87,6 +96,7 @@ async def get_challenges(
 # ---------------------------------------------------------------------------
 # AI Insights
 # ---------------------------------------------------------------------------
+
 
 @router.get("/insights", response_model=InsightResponse)
 async def get_ai_insights(
@@ -107,9 +117,12 @@ async def get_ai_insights(
 # History & Analytics
 # ---------------------------------------------------------------------------
 
+
 @router.get("/history", response_model=HistoryResponse)
 async def get_emissions_history(
-    days: int = Query(default=30, ge=7, le=365, description="Number of days of history to retrieve."),
+    days: int = Query(
+        default=30, ge=7, le=365, description="Number of days of history to retrieve."
+    ),
     current_user: dict = Depends(get_current_user),
 ) -> HistoryResponse:
     """

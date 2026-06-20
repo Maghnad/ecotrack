@@ -2,20 +2,25 @@
 EcoTrack - Pydantic Schemas
 Single source of truth for all request/response shapes.
 """
-from __future__ import annotations
-from pydantic import BaseModel, Field, field_validator
-from typing import Optional, Literal
-from datetime import datetime
 
+from __future__ import annotations
+
+from typing import Literal, Optional
+
+from pydantic import BaseModel, Field
 
 # ---------------------------------------------------------------------------
 # Footprint Logging
 # ---------------------------------------------------------------------------
 
+
 class CommuteLogRequest(BaseModel):
     """A single commute entry to log and calculate emissions for."""
-    origin_address: str = Field(..., description="Starting point of the commute.")
-    destination_address: str = Field(..., description="End point of the commute.")
+
+    origin_address: str = Field(...,
+                                description="Starting point of the commute.")
+    destination_address: str = Field(...,
+                                     description="End point of the commute.")
     transport_mode: Literal["driving", "transit", "bicycling", "walking"] = Field(
         ..., description="Mode of transport used for this commute."
     )
@@ -39,12 +44,16 @@ class CommuteLogResponse(BaseModel):
 # Activity Categories (new: diet, energy, shopping)
 # ---------------------------------------------------------------------------
 
+
 class DietLogRequest(BaseModel):
     """Log dietary choices to estimate food-related carbon footprint."""
+
     meal_type: Literal["beef", "chicken", "fish", "vegetarian", "vegan"] = Field(
         ..., description="Primary protein category of the meal."
     )
-    servings: float = Field(1.0, ge=0.1, le=10.0, description="Number of servings (portions).")
+    servings: float = Field(
+        1.0, ge=0.1, le=10.0, description="Number of servings (portions)."
+    )
     date: Optional[str] = None
 
 
@@ -59,8 +68,13 @@ class DietLogResponse(BaseModel):
 
 class EnergyLogRequest(BaseModel):
     """Log home energy consumption."""
-    electricity_kwh: float = Field(0.0, ge=0.0, description="Electricity consumed in kWh.")
-    natural_gas_cubic_meters: float = Field(0.0, ge=0.0, description="Natural gas in cubic metres.")
+
+    electricity_kwh: float = Field(
+        0.0, ge=0.0, description="Electricity consumed in kWh."
+    )
+    natural_gas_cubic_meters: float = Field(
+        0.0, ge=0.0, description="Natural gas in cubic metres."
+    )
     date: Optional[str] = None
 
 
@@ -76,6 +90,7 @@ class EnergyLogResponse(BaseModel):
 # ---------------------------------------------------------------------------
 # User Profile & Gamification
 # ---------------------------------------------------------------------------
+
 
 class UserProfile(BaseModel):
     uid: str
@@ -118,12 +133,13 @@ class LeaderboardResponse(BaseModel):
 # Challenges
 # ---------------------------------------------------------------------------
 
+
 class Challenge(BaseModel):
     challenge_id: str
     title: str
     description: str
     icon_emoji: str
-    target_metric: str           # e.g. "carbon_emissions_kg"
+    target_metric: str  # e.g. "carbon_emissions_kg"
     target_value: float
     xp_reward: int
     deadline_date: str
@@ -141,6 +157,7 @@ class ChallengeListResponse(BaseModel):
 # AI Insights
 # ---------------------------------------------------------------------------
 
+
 class InsightResponse(BaseModel):
     tips: list[str]
     weekly_summary: str
@@ -152,6 +169,7 @@ class InsightResponse(BaseModel):
 # ---------------------------------------------------------------------------
 # Carbon History & Analytics
 # ---------------------------------------------------------------------------
+
 
 class DailyEmission(BaseModel):
     date: str
@@ -165,12 +183,13 @@ class HistoryResponse(BaseModel):
     daily_emissions: list[DailyEmission]
     period_total_kg: float
     period_average_daily_kg: float
-    comparison_to_global_average_percent: float  # % above/below 16.1 kg/day global avg
+    comparison_to_global_average_percent: float  # vs 16.1 kg/day global avg
 
 
 # ---------------------------------------------------------------------------
 # Eco Actions (quick-log positive actions)
 # ---------------------------------------------------------------------------
+
 
 class EcoActionRequest(BaseModel):
     action_type: Literal[
@@ -196,6 +215,7 @@ class EcoActionResponse(BaseModel):
 # Social / Friends
 # ---------------------------------------------------------------------------
 
+
 class FriendInviteRequest(BaseModel):
     friend_email: str
 
@@ -204,5 +224,5 @@ class FriendComparisonResponse(BaseModel):
     your_weekly_kg: float
     friend_weekly_kg: float
     friend_display_name: str
-    you_are_better_by_kg: float   # negative means friend is greener
+    you_are_better_by_kg: float  # negative means friend is greener
     message: str
