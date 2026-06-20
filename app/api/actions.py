@@ -128,7 +128,7 @@ async def chat_with_ai(
     uid = current_user["uid"]
     db.ensure_user_exists(uid, current_user.get("email"))
     response_data = ai.chat_with_gemini(uid, request.message)
-    
+
     # If a footprint was detected, log it automatically
     if response_data["carbon_emissions_kg"] > 0:
         log_entry = {
@@ -140,7 +140,7 @@ async def chat_with_ai(
         db.save_footprint_log(uid, log_entry)
         gs.award_xp_and_update_streak(uid, settings.xp_per_footprint_log)
         cs.check_and_award_challenge_completion(uid)
-        
+
     return ChatResponse(**response_data)
 
 

@@ -168,7 +168,7 @@ def check_and_award_challenge_completion(uid: str) -> list[dict]:
                 challenge.challenge_id,
                 {"completed": True, "xp_awarded": True, "week": week_key},
             )
-            newly_completed.append(challenge.dict())
+            newly_completed.append(challenge.model_dump())
 
     return newly_completed
 

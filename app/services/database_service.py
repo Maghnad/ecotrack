@@ -6,7 +6,7 @@ The rest of the app never touches Firestore directly.
 
 from __future__ import annotations
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Optional, Any
 
 from app.core.config import get_settings
@@ -63,7 +63,7 @@ def ensure_user_exists(uid: str, email: Optional[str]) -> dict:
     profile = get_user_profile(uid)
     if profile:
         return profile
-    now = datetime.utcnow().isoformat()
+    now = datetime.now(timezone.utc).isoformat()
     new_profile: dict[str, Any] = {
         "uid": uid,
         "email": email,
@@ -88,10 +88,10 @@ def ensure_user_exists(uid: str, email: Optional[str]) -> dict:
 
 def save_footprint_log(uid: str, log_data: dict) -> str:
     """Persist a footprint log entry and return its auto-generated ID."""
-    log_id = f"log_{uid}_{datetime.utcnow().timestamp():.0f}"
+    log_id = f"log_{uid}_{datetime.now(timezone.utc).timestamp():.0f}"
     log_data["log_id"] = log_id
     log_data["uid"] = uid
-    log_data["logged_at"] = datetime.utcnow().isoformat()
+    log_data["logged_at"] = datetime.now(timezone.utc).isoformat()
 
     if settings.environment == "testing":
         collection_key = f"footprint_logs/{uid}"
@@ -111,7 +111,7 @@ def save_footprint_log(uid: str, log_data: dict) -> str:
 
 def get_user_logs(uid: str, days: int = 7) -> list[dict]:
     """Retrieve the last `days` days of logs for a user."""
-    cutoff = (datetime.utcnow() - timedelta(days=days)).isoformat()
+    cutoff = (datetime.now(timezone.utc) - timedelta(days=days)).isoformat()
 
     if settings.environment == "testing":
         collection_key = f"footprint_logs/{uid}"

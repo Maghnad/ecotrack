@@ -6,7 +6,7 @@ This is the engine that makes EcoTrack addictive (in a good way).
 
 from __future__ import annotations
 
-from datetime import date, timedelta, datetime
+from datetime import date, timedelta, datetime, timezone
 
 from app.core.config import get_settings
 from app.services import database_service as db
@@ -267,5 +267,5 @@ def _make_badge_from_definition(defn: dict) -> dict:
         "name": defn["name"],
         "description": defn["description"],
         "icon_emoji": defn["icon_emoji"],
-        "earned_at": datetime.utcnow().isoformat(),
+        "earned_at": datetime.now(timezone.utc).isoformat(),
     }

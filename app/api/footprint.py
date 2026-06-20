@@ -197,7 +197,7 @@ async def log_baseline(
     diet_kg = {"vegan": 1500, "vegetarian": 1700, "pescatarian": 2000, "meat_average": 2500, "meat_heavy": 3300}[request.diet_type]
     commute_kg = {"remote": 0, "walking": 0, "cycling": 0, "transit": 800, "driving": 2500}[request.commute_method]
     energy_kg = {"renewable": 500, "grid_average": 2000, "coal_heavy": 4000}[request.home_energy]
-    
+
     total_kg = diet_kg + commute_kg + energy_kg
 
     log_entry = {

@@ -66,7 +66,12 @@ async def add_security_headers(request: Request, call_next):
     response.headers["X-Frame-Options"] = "DENY"
     response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
     # Allow CDNs for fonts, charts, 3D, and inline scripts/styles
-    response.headers["Content-Security-Policy"] = "default-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://fonts.googleapis.com https://fonts.gstatic.com"
+    csp = (
+        "default-src 'self' 'unsafe-inline' 'unsafe-eval' "
+        "https://cdn.jsdelivr.net https://cdnjs.cloudflare.com "
+        "https://fonts.googleapis.com https://fonts.gstatic.com"
+    )
+    response.headers["Content-Security-Policy"] = csp
     return response
 
 

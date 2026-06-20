@@ -21,6 +21,7 @@ EcoTrack is an interactive, gamified web application designed to help users trac
   - 🟠 **Warning (> 10kg):** Turns orange and shrinks slightly.
   - 🔴 **Critical (> 25kg):** Turns red and shrinks drastically, indicating an unsustainable footprint.
 - **Emissions Breakdown:** A dynamic Doughnut chart (Chart.js) visualizing the exact distribution of emissions across Diet, Transport, and Energy.
+- **Offset & Act Hub:** Offset unavoidable emissions by directly funding verified green projects (Tree planting, Solar) or redeeming XP for discounts at partner eco-brands.
 
 ### 4. Google Gemini AI Integration
 - **Context-Aware AI Insights:** The app analyzes the user's recent logs to generate highly personalized reduction tips using the Gemini 1.5 Flash API.

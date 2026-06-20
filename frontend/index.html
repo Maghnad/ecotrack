@@ -80,6 +80,7 @@
             <li id="nav-analytics" role="tab" aria-selected="false" tabindex="0" onclick="switchTab('analytics')">📊 Analytics</li>
             <li id="nav-challenges" role="tab" aria-selected="false" tabindex="0" onclick="switchTab('challenges')">🎯 Challenges</li>
             <li id="nav-leaderboard" role="tab" aria-selected="false" tabindex="0" onclick="switchTab('leaderboard')">🏆 Leaderboard</li>
+            <li id="nav-offsets" role="tab" tabindex="0" onclick="switchTab('offsets')">🌍 Offset Hub</li>
         </ul>
         <div class="user-profile">
             <div class="avatar">👤</div>
@@ -275,6 +276,36 @@
                         <!-- Injected via JS -->
                     </tbody>
                 </table>
+            </div>
+        </div>
+
+        <!-- OFFSETS TAB -->
+        <div id="tab-offsets" class="tab-content" role="tabpanel" aria-label="Offsets">
+            <header>
+                <h1>Offset & Act Hub 🌍</h1>
+                <p>Support verified green projects or redeem your Eco-Points!</p>
+            </header>
+            <div class="challenges-grid">
+                <section class="card glass">
+                    <h2>🌳 Plant a Tree</h2>
+                    <p style="color:#94a3b8; font-size: 0.9rem; margin-bottom:1rem;">Offsets ~20 kg CO₂ per year.</p>
+                    <button class="btn primary-btn w-full" onclick="alert('Redirecting to stripe checkout for verified Tree Planting...')">Support for $2.00</button>
+                </section>
+                <section class="card glass">
+                    <h2>☀️ Fund Solar</h2>
+                    <p style="color:#94a3b8; font-size: 0.9rem; margin-bottom:1rem;">Offsets ~50 kg CO₂ immediately.</p>
+                    <button class="btn primary-btn w-full" onclick="alert('Redirecting to stripe checkout for Solar Projects...')">Support for $5.00</button>
+                </section>
+                <section class="card glass" style="border-top: 2px solid #f59e0b;">
+                    <h2>☕ 10% Off Eco-Coffee</h2>
+                    <p style="color:#94a3b8; font-size: 0.9rem; margin-bottom:1rem;">Redeemable online at FairTradeBeans.</p>
+                    <button class="btn w-full" style="background:#f59e0b; color:white; border:none; padding:10px; border-radius:5px;" onclick="alert('Insufficient XP! Keep logging actions to redeem.')">Redeem (500 XP)</button>
+                </section>
+                <section class="card glass" style="border-top: 2px solid #a855f7;">
+                    <h2>🚴 20% Off E-Bikes</h2>
+                    <p style="color:#94a3b8; font-size: 0.9rem; margin-bottom:1rem;">Valid at CityBikes locations worldwide.</p>
+                    <button class="btn w-full" style="background:#a855f7; color:white; border:none; padding:10px; border-radius:5px;" onclick="alert('Insufficient XP! Keep logging actions to redeem.')">Redeem (1000 XP)</button>
+                </section>
             </div>
         </div>
 

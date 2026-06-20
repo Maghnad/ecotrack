@@ -5,7 +5,7 @@ Loads and validates all environment variables using pydantic-settings.
 
 from functools import lru_cache
 
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
@@ -35,8 +35,7 @@ class Settings(BaseSettings):
     # --- Challenge Config ---
     weekly_challenge_day: int = 0  # 0 = Monday
 
-    class Config:
-        env_file = ".env"
+    model_config = SettingsConfigDict(env_file=".env")
 
 
 @lru_cache()

@@ -57,13 +57,17 @@ def generate_ai_insights(uid: str, recent_logs: list[dict], category: str = None
 def chat_with_gemini(uid: str, message: str) -> dict:
     if settings.environment == "testing" or settings.gemini_api_key == "mock_key":
         return {"reply": f"Got it: {message}", "carbon_emissions_kg": 0.0, "message": "Mock response"}
-    
+
     try:
         import google.generativeai as genai
         api_key = get_secret("gemini_api_key")
         genai.configure(api_key=api_key)
         model = genai.GenerativeModel("gemini-1.5-flash")
-        prompt = f"User says: '{message}'. Act as EcoTrack's chatbot. Give a very short helpful reply and estimate the carbon footprint in kg CO2. Format: 'Reply text|2.5'. If no footprint, put 0."
+        prompt = (
+            f"User says: '{message}'. Act as EcoTrack's chatbot. "
+            "Give a very short helpful reply and estimate the carbon footprint in kg CO2. "
+            "Format: 'Reply text|2.5'. If no footprint, put 0."
+        )
         response = model.generate_content(prompt)
         parts = response.text.split("|")
         reply = parts[0].strip() if parts else "I couldn't process that."
@@ -138,7 +142,7 @@ def _build_mock_insight(logs: list[dict], category: str = None) -> dict:
         tips = ["Try going meatless on Mondays.", "Choose local produce."] + tips[:1]
     elif category == "transport":
         tips = ["Walk short distances.", "Carpool to work."] + tips[:1]
-        
+
     return {
         "tips": tips,
         "weekly_summary": _summarise_logs(logs),

@@ -10,7 +10,7 @@ from app.services import database_service as db
 from app.services import calculation_service as calc
 from app.services import gamification_service as gs
 from app.services import challenge_service as cs
-from app.services import analytics_service as analytics
+
 
 client = TestClient(app)
 AUTH_HEADERS = {"Authorization": "Bearer mock_token"}
