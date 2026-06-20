@@ -1,174 +1,68 @@
-# EcoTrack v2.0 — Carbon Footprint Backend
+# EcoTrack v2 - Gamified Carbon Footprint Tracker 🌍
 
-EcoTrack helps individuals understand, track, and reduce their carbon footprint through simple logging, personalised AI insights, **gamification**, and **weekly community challenges**.
-
----
-
-## What's New in v2.0
-
-| Feature | Description |
-|---|---|
-| 🍽️ **Diet Logging** | Track meal carbon footprints (beef → vegan) with relatable comparisons |
-| ⚡ **Energy Logging** | Log electricity and natural gas usage with per-source CO₂ breakdown |
-| 🌱 **Eco-Actions** | Quick-log positive actions (reusable bags, planted trees) with fun facts |
-| 🔥 **Streaks & XP** | Daily streaks, XP per action, 7-level progression (Seedling → EcoChampion) |
-| 🏅 **10 Badges** | Unlock achievements for milestones (first log, zero emissions, 100 kg saved…) |
-| 🏆 **Leaderboard** | Global XP leaderboard with current-user rank always shown |
-| 📅 **Weekly Challenges** | 3 auto-generated challenges per week (same for all users — social!) |
-| 📊 **Emissions History** | 30-day daily breakdown by category vs global per-capita average |
-| 🤖 **Gemini AI Insights** | Personalised reduction tips from the last 14 days of activity |
+EcoTrack is an interactive, gamified web application designed to help users track, understand, and reduce their carbon footprint. By combining data analytics, an engaging 3D visualizer, and Google Gemini-powered AI insights, EcoTrack turns the fight against climate change into a rewarding daily habit.
 
 ---
 
-## Architecture
+## 🚀 Features Implemented
 
-```
-app/
-├── main.py                   # FastAPI app assembly & CORS
-├── api/
-│   ├── footprint.py          # POST /footprint/commute|diet|energy
-│   ├── users.py              # GET /users/me, leaderboard
-│   └── actions.py            # eco-actions, challenges, insights, history
-├── services/
-│   ├── calculation_service.py  # All emission factor math (IPCC/DEFRA sources)
-│   ├── gamification_service.py # XP, levels, streaks, badge engine
-│   ├── challenge_service.py    # Weekly challenge generation & progress
-│   ├── analytics_service.py    # History aggregation & leaderboard
-│   ├── ai_insight_service.py   # Gemini AI prompt & response handling
-│   └── database_service.py     # Firestore abstraction + in-memory mock
-├── models/
-│   └── schemas.py            # All Pydantic request/response models
-└── core/
-    ├── config.py             # pydantic-settings configuration
-    ├── security.py           # Firebase JWT validation middleware
-    └── secrets.py            # Google Secret Manager integration
-tests/
-└── test_ecotrack.py          # 66 tests across 11 test classes
-```
+### 1. Interactive Dashboard & Gamification
+- **XP & Leveling System:** Users earn XP for logging sustainable actions (e.g., using public transit, having a meatless meal), leveling up from "Seedling" to "EcoChampion".
+- **Dynamic Challenges:** Weekly rotating challenges (e.g., "Transit Hero", "Plant a Tree") offer bonus XP for completing specific environmental goals.
+- **Global Leaderboard:** Users compete globally based on Total XP and Total Carbon Saved, driving community engagement.
 
-### Design Principles
+### 2. Comprehensive Footprint Tracking
+- **Baseline Quiz:** New users take a quiz to establish their initial yearly carbon footprint based on diet, commute, and home energy sources.
+- **Emission vs. Savings Logging:** Users can log both *Carbon Savings* (positive eco-actions) and *Carbon Emissions* (daily diet, transport, and energy usage), providing a holistic view of their impact.
 
-- **Low coupling:** Every API router calls exactly one service method. Routers never touch Firestore directly.
-- **High cohesion:** `calculation_service` does only math. `gamification_service` does only XP/badges. No overlap.
-- **Testability:** `database_service` uses an in-memory dict mock when `ENVIRONMENT=testing`. No mocking libraries needed — all 66 tests run with zero live API calls.
-- **Readability:** `carbon_emissions_kg`, `primary_transport_mode`, `CalculationService` — every name is self-documenting.
+### 3. Analytics & 3D Visualizations
+- **3D Eco-World:** A living 3D planet built with Three.js that visually reacts to the user's 30-day footprint. 
+  - 🟢 **Healthy (< 10kg):** Lush green and full size.
+  - 🟠 **Warning (> 10kg):** Turns orange and shrinks slightly.
+  - 🔴 **Critical (> 25kg):** Turns red and shrinks drastically, indicating an unsustainable footprint.
+- **Emissions Breakdown:** A dynamic Doughnut chart (Chart.js) visualizing the exact distribution of emissions across Diet, Transport, and Energy.
+
+### 4. Google Gemini AI Integration
+- **Context-Aware AI Insights:** The app analyzes the user's recent logs to generate highly personalized reduction tips using the Gemini 1.5 Flash API.
+- **Conversational EcoBot:** A floating chatbot interface that allows users to ask natural language questions (e.g., "What is the footprint of a beef burger?"). The bot can automatically detect and log emissions directly from the conversation!
 
 ---
 
-## Google Products Used (6+)
+## 🛡️ Project Standards: Quality, Security & Accessibility
 
-| # | Product | Where |
-|---|---|---|
-| 1 | **Firebase Authentication** | `app/core/security.py` — JWT validation on every route |
-| 2 | **Cloud Firestore** | `app/services/database_service.py` — user profiles, logs, challenge progress |
-| 3 | **Maps Platform (Distance Matrix)** | `app/services/calculation_service.py` — precise commute distances |
-| 4 | **Gemini 1.5 Flash** | `app/services/ai_insight_service.py` — personalised reduction tips |
-| 5 | **Cloud Secret Manager** | `app/core/secrets.py` — zero hardcoded credentials |
-| 6 | **Cloud Run** *(proposed)* | Containerised deployment target — stateless, auto-scaling |
+We strictly adhered to core engineering pillars throughout development:
 
----
+### 🧪 Testing
+- **Robust Test Suite:** The backend is covered by over **70 passing Pytest tests** (`tests/test_ecotrack.py`).
+- **Scope:** Tests rigorously verify the Gamification math, Carbon calculation logic, API routing, and AI fallback mechanisms.
 
-## API Reference
+### 💎 Code Quality & Architecture
+- **Backend (Python/FastAPI):** Built with strict type hinting, modular service architecture (separating `analytics_service`, `gamification_service`, etc.), and Pydantic schemas for request/response validation.
+- **Frontend (Vanilla JS/HTML/CSS):** Highly performant vanilla Javascript without heavy framework bloat.
+- **Accessibility (a11y):** The frontend is fully audited for **WCAG 2.1 AA Compliance**. It includes ARIA roles, semantic HTML, dynamic `aria-live` regions, and complete keyboard navigation support (Space/Enter activation) for all interactive elements and tabs.
 
-### Footprint Logging
-| Method | Endpoint | Description |
-|---|---|---|
-| `POST` | `/footprint/commute` | Log a commute (calls Maps API for distance) |
-| `POST` | `/footprint/diet` | Log a meal by protein category |
-| `POST` | `/footprint/energy` | Log electricity + gas usage |
-
-### Eco-Actions & Challenges
-| Method | Endpoint | Description |
-|---|---|---|
-| `POST` | `/eco-actions` | Log a positive eco-action |
-| `GET` | `/challenges` | This week's challenges + your progress |
-| `GET` | `/insights` | Gemini AI personalised tips |
-| `GET` | `/history?days=30` | Daily emissions breakdown |
-
-### Users & Gamification
-| Method | Endpoint | Description |
-|---|---|---|
-| `GET` | `/users/me` | Full profile: XP, level, streak, badges |
-| `PATCH` | `/users/me/display-name` | Update leaderboard display name |
-| `GET` | `/users/leaderboard` | Global XP leaderboard |
-| `GET` | `/health` | Public health check (no auth) |
+### 🔒 Security
+- **Content Security Policy (CSP):** Implemented in `main.py` with `X-Frame-Options: DENY` and `X-Content-Type-Options: nosniff` to protect against clickjacking and MIME-sniffing. Secure CDNs are whitelisted for Chart.js and Three.js.
+- **API Protection:** Backend routes are protected via JWT Bearer Token dependency injection (`get_current_user`), ready for enterprise authentication integration.
 
 ---
 
-## Gamification Design
+## 🔮 Future Work & Roadmap
 
-### XP & Levels
-| Level | Name | XP Required |
-|---|---|---|
-| 0 | 🌱 Seedling | 0 |
-| 1 | 🌿 Sprout | 100 |
-| 2 | 🌳 Sapling | 250 |
-| 3 | 🏕️ Grove | 500 |
-| 4 | 🌲 Forest | 1,000 |
-| 5 | 🌴 Rainforest | 2,000 |
-| 6 | ⚡ EcoChampion | 5,000 |
+To take this application to a production-ready enterprise level, the following modifications and tool integrations are recommended:
 
-**XP per action:** +10 (log), +5 (streak bonus), +50–100 (challenge completion)
+### 1. Authentication & Database Migration
+- **Implement Auth0 or Firebase Auth:** Replace the current mock JWT token system with real OAuth2/OIDC providers to handle user signup, login, and secure session management.
+- **Migrate to PostgreSQL:** Replace the lightweight JSON file-based database (`database_service.py`) with a robust relational database (PostgreSQL) using an ORM like SQLAlchemy or Prisma for better scaling, indexing, and concurrent writes.
 
-### Badges (10 total)
-`First Step` · `Week Warrior` · `Consistent Eco-Tracker` · `Habit Forming` · `Seven-Day Streak` · `Eco Obsessed` · `Sapling` · `Rainforest Guardian` · `10 kg Saved` · `Carbon Crusher` · `Zero Emissions Commuter`
+### 2. Advanced Integrations
+- **Google Maps API Integration:** Swap the mock distance calculator in `calculation_service.py` with a live Google Maps Distance Matrix API key to calculate real-world commute distances and precise transport emissions based on live traffic and routes.
+- **Smart Home API (IoT):** Integrate with smart meter APIs to automatically fetch and log real-time home electricity and gas usage (Energy footprint).
 
-### Weekly Challenges (pool of 7, 3 active per week)
-Auto-rotated every Monday by ISO week number — identical for all users, enabling social comparison:
-- 🚌 Car-Free Commuter · 🌱 Green Week · 🥗 Plant-Based Days
-- ♻️ Eco-Action Hero · 📅 Daily Devotion · 🚴 Pedal Power · 💪 Save 5 kg of CO₂
+### 3. Progressive Web App (PWA) & Mobile
+- **Service Workers:** Implement standard PWA service workers and a `manifest.json` so users can install EcoTrack directly to their mobile home screens.
+- **Offline Mode:** Use `IndexedDB` to cache footprint logs when the user is offline, syncing them to the FastAPI backend once a connection is re-established.
 
----
-
-## Installation & Setup
-
-```bash
-python -m venv venv
-source venv/bin/activate       # Windows: venv\Scripts\activate
-pip install -r requirements.txt
-```
-
-Create a `.env` file:
-```env
-PROJECT_ID=your-gcp-project-id
-ENVIRONMENT=development
-GOOGLE_MAPS_API_KEY=mock_key   # Replace with real key for Maps
-GEMINI_API_KEY=mock_key        # Replace with real key for Gemini
-```
-
-Run the server:
-```bash
-uvicorn app.main:app --reload
-```
-
-Open Swagger UI: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
-
----
-
-## Testing
-
-```bash
-pytest tests/ -v
-```
-
-**66 tests across 11 classes** covering:
-- Emission calculations (all transport modes, diet types, energy sources, eco-actions)
-- All API endpoints (status codes, response shapes, validation)
-- Gamification engine (XP accumulation, level thresholds, badge unlocks, streaks)
-- Challenge progress calculation and weekly rotation consistency
-- Analytics aggregation and leaderboard ranking
-- AI insight fallback behaviour
-
-All tests run with **zero live API calls** — the mock environment intercepts all Google service calls.
-
----
-
-## Emission Factors
-
-| Category | Source | Factor |
-|---|---|---|
-| Driving | UK DEFRA 2023 | 0.171 kg CO₂/km |
-| Transit (bus) | UK average | 0.089 kg CO₂/km |
-| Beef | IPCC AR6 | 6.61 kg CO₂e/serving |
-| Electricity | UK Grid 2023 | 0.233 kg CO₂/kWh |
-| Natural Gas | Standard | 2.04 kg CO₂/m³ |
+### 4. CI/CD & Infrastructure Tools
+- **Dockerization:** Create `Dockerfile` and `docker-compose.yml` to containerize the FastAPI backend and frontend for consistent cross-platform deployment.
+- **GitHub Actions:** Set up automated CI/CD pipelines to automatically run the Pytest suite, linting (Ruff/Black), and deploy to platforms like Render, Heroku, or AWS Elastic Beanstalk upon merging to the `main` branch.

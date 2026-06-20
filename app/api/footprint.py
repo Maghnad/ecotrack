@@ -14,6 +14,8 @@ from app.models.schemas import (
     DietLogResponse,
     EnergyLogRequest,
     EnergyLogResponse,
+    BaselineRequest,
+    BaselineResponse,
 )
 from app.services import calculation_service as calc
 from app.services import challenge_service as cs
@@ -173,6 +175,44 @@ async def log_energy(
         carbon_emissions_kg=energy_data["carbon_emissions_kg"],
         electricity_kg_co2=energy_data["electricity_kg_co2"],
         gas_kg_co2=energy_data["gas_kg_co2"],
+        xp_awarded=xp_result["xp_awarded"],
+        new_total_xp=xp_result["new_total_xp"],
+    )
+
+
+@router.post(
+    "/baseline", response_model=BaselineResponse, status_code=status.HTTP_201_CREATED
+)
+async def log_baseline(
+    request: BaselineRequest,
+    current_user: dict = Depends(get_current_user),
+) -> BaselineResponse:
+    """
+    Log an initial baseline footprint from the lifestyle quiz.
+    """
+    uid = current_user["uid"]
+    db.ensure_user_exists(uid, current_user.get("email"))
+
+    # Extremely rough estimation mapping for gamification purposes
+    diet_kg = {"vegan": 1500, "vegetarian": 1700, "pescatarian": 2000, "meat_average": 2500, "meat_heavy": 3300}[request.diet_type]
+    commute_kg = {"remote": 0, "walking": 0, "cycling": 0, "transit": 800, "driving": 2500}[request.commute_method]
+    energy_kg = {"renewable": 500, "grid_average": 2000, "coal_heavy": 4000}[request.home_energy]
+    
+    total_kg = diet_kg + commute_kg + energy_kg
+
+    log_entry = {
+        "log_type": "baseline",
+        "diet_type": request.diet_type,
+        "commute_method": request.commute_method,
+        "home_energy": request.home_energy,
+        "carbon_emissions_kg": total_kg,
+    }
+    db.save_footprint_log(uid, log_entry)
+    xp_result = gs.award_xp_and_update_streak(uid, 50)  # Big reward for onboarding
+
+    return BaselineResponse(
+        baseline_yearly_kg=total_kg,
+        message="Baseline profile established!",
         xp_awarded=xp_result["xp_awarded"],
         new_total_xp=xp_result["new_total_xp"],
     )

@@ -13,6 +13,8 @@ from app.models.schemas import (
     EcoActionResponse,
     HistoryResponse,
     InsightResponse,
+    ChatRequest,
+    ChatResponse,
 )
 from app.services import ai_insight_service as ai
 from app.services import analytics_service as analytics
@@ -100,6 +102,7 @@ async def get_challenges(
 
 @router.get("/insights", response_model=InsightResponse)
 async def get_ai_insights(
+    category: str = Query(None, description="Optional category filter (e.g. 'diet')"),
     current_user: dict = Depends(get_current_user),
 ) -> InsightResponse:
     """
@@ -109,8 +112,36 @@ async def get_ai_insights(
     uid = current_user["uid"]
     db.ensure_user_exists(uid, current_user.get("email"))
     recent_logs = db.get_user_logs(uid, days=14)
-    insight_data = ai.generate_ai_insights(uid, recent_logs)
+    insight_data = ai.generate_ai_insights(uid, recent_logs, category)
     return InsightResponse(**insight_data)
+
+
+@router.post("/insights/chat", response_model=ChatResponse)
+async def chat_with_ai(
+    request: ChatRequest,
+    current_user: dict = Depends(get_current_user),
+) -> ChatResponse:
+    """
+    Conversational AI chatbot endpoint. Evaluates a natural language message
+    and returns a reply and an estimated carbon footprint if an action is detected.
+    """
+    uid = current_user["uid"]
+    db.ensure_user_exists(uid, current_user.get("email"))
+    response_data = ai.chat_with_gemini(uid, request.message)
+    
+    # If a footprint was detected, log it automatically
+    if response_data["carbon_emissions_kg"] > 0:
+        log_entry = {
+            "log_type": "chatbot_log",
+            "message": request.message,
+            "carbon_emissions_kg": response_data["carbon_emissions_kg"],
+            "carbon_saved_kg": 0.0,
+        }
+        db.save_footprint_log(uid, log_entry)
+        gs.award_xp_and_update_streak(uid, settings.xp_per_footprint_log)
+        cs.check_and_award_challenge_completion(uid)
+        
+    return ChatResponse(**response_data)
 
 
 # ---------------------------------------------------------------------------

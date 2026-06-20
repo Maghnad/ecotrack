@@ -567,3 +567,59 @@ class TestAIInsights:
     def test_insights_tips_is_a_list(self):
         response = client.get("/insights", headers=AUTH_HEADERS)
         assert isinstance(response.json()["tips"], list)
+
+
+# ---------------------------------------------------------------------------
+# Baseline Quiz
+# ---------------------------------------------------------------------------
+
+class TestBaselineLogging:
+    def test_log_baseline_returns_201(self):
+        response = client.post(
+            "/footprint/baseline",
+            json={
+                "diet_type": "vegan",
+                "commute_method": "remote",
+                "home_energy": "renewable"
+            },
+            headers=AUTH_HEADERS,
+        )
+        assert response.status_code == 201
+
+    def test_log_baseline_awards_xp(self):
+        response = client.post(
+            "/footprint/baseline",
+            json={
+                "diet_type": "vegan",
+                "commute_method": "remote",
+                "home_energy": "renewable"
+            },
+            headers=AUTH_HEADERS,
+        )
+        data = response.json()
+        assert data["xp_awarded"] == 50
+
+
+# ---------------------------------------------------------------------------
+# AI Chatbot
+# ---------------------------------------------------------------------------
+
+class TestAIChatbot:
+    def test_chat_with_ai_returns_200(self):
+        response = client.post(
+            "/insights/chat",
+            json={"message": "I drove a car"},
+            headers=AUTH_HEADERS,
+        )
+        assert response.status_code == 200
+
+    def test_chat_response_structure(self):
+        response = client.post(
+            "/insights/chat",
+            json={"message": "I ate beef"},
+            headers=AUTH_HEADERS,
+        )
+        data = response.json()
+        assert "reply" in data
+        assert "carbon_emissions_kg" in data
+        assert "message" in data

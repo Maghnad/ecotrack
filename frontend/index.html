@@ -6,7 +6,10 @@
     <title>EcoTrack v2 - Gamified Carbon Footprint</title>
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
+    <!-- Chart.js and Three.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <link rel="stylesheet" href="styles.css?v=5">
 </head>
 <body>
     <a href="#main-content" class="skip-link">Skip to main content</a>
@@ -25,6 +28,44 @@
         </div>
     </div>
 
+    <!-- Quiz Baseline Overlay -->
+    <div id="quiz-overlay" class="overlay hidden" style="z-index: 999;">
+        <div class="card glass login-card">
+            <h2>Your Eco-Baseline</h2>
+            <p>Let's establish your starting point before you begin tracking!</p>
+            <form id="quiz-form">
+                <div class="input-group">
+                    <label for="quiz-diet">Primary Diet</label>
+                    <select id="quiz-diet" required>
+                        <option value="vegan">Vegan</option>
+                        <option value="vegetarian">Vegetarian</option>
+                        <option value="pescatarian">Pescatarian</option>
+                        <option value="meat_average" selected>Average Meat</option>
+                        <option value="meat_heavy">Heavy Meat</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label for="quiz-commute">Main Commute</label>
+                    <select id="quiz-commute" required>
+                        <option value="driving" selected>Driving</option>
+                        <option value="transit">Public Transit</option>
+                        <option value="cycling">Cycling / Walking</option>
+                        <option value="remote">Work from Home</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label for="quiz-energy">Home Energy Source</label>
+                    <select id="quiz-energy" required>
+                        <option value="renewable">100% Renewable</option>
+                        <option value="grid_average" selected>Standard Grid</option>
+                        <option value="coal_heavy">Coal/Fossil Heavy</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn primary-btn">Calculate Baseline</button>
+            </form>
+        </div>
+    </div>
+
     <div class="background-effects">
         <div class="glow-orb orb-1"></div>
         <div class="glow-orb orb-2"></div>
@@ -35,9 +76,10 @@
     <nav class="sidebar glass" aria-label="Main Navigation">
         <h2>EcoTrack</h2>
         <ul role="tablist" aria-label="Dashboard Sections">
-            <li role="tab" aria-selected="true" tabindex="0" class="active" onclick="switchTab('dashboard')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault(); switchTab('dashboard');}">🏠 Dashboard</li>
-            <li role="tab" aria-selected="false" tabindex="0" onclick="switchTab('challenges')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault(); switchTab('challenges');}">🎯 Challenges</li>
-            <li role="tab" aria-selected="false" tabindex="0" onclick="switchTab('leaderboard')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault(); switchTab('leaderboard');}">🏆 Leaderboard</li>
+            <li id="nav-dashboard" role="tab" aria-selected="true" tabindex="0" class="active" onclick="switchTab('dashboard')">🏠 Dashboard</li>
+            <li id="nav-analytics" role="tab" aria-selected="false" tabindex="0" onclick="switchTab('analytics')">📊 Analytics</li>
+            <li id="nav-challenges" role="tab" aria-selected="false" tabindex="0" onclick="switchTab('challenges')">🎯 Challenges</li>
+            <li id="nav-leaderboard" role="tab" aria-selected="false" tabindex="0" onclick="switchTab('leaderboard')">🏆 Leaderboard</li>
         </ul>
         <div class="user-profile">
             <div class="avatar">👤</div>
@@ -54,7 +96,7 @@
         <div id="tab-dashboard" class="tab-content active" role="tabpanel" aria-label="Dashboard">
             <header>
                 <h1>Welcome Back!</h1>
-                <p>Track your footprint, earn XP, and save the planet.</p>
+                <p>Track your footprint, earn XP, and help us achieve UN SDG 13 (Climate Action) and the Paris Agreement goals.</p>
             </header>
 
             <div class="stats-row">
@@ -73,29 +115,100 @@
             </div>
 
             <div class="main-columns">
-                <!-- Log Action -->
-                <section class="card glass">
-                    <h2>Log Sustainable Action</h2>
-                    <form id="action-form">
-                        <div class="input-group">
-                            <label for="action-type">Action</label>
-                            <select id="action-type">
-                                <option value="used_reusable_bag">Used a Reusable Bag</option>
-                                <option value="planted_tree">Planted a Tree</option>
-                                <option value="avoided_meat">Had a Meatless Meal</option>
-                                <option value="used_public_transport">Took Public Transit</option>
-                                <option value="reduced_heating">Reduced Heating/AC</option>
-                                <option value="air_dried_laundry">Air-Dried Laundry</option>
-                            </select>
-                        </div>
-                        <button type="submit" class="btn primary-btn">Log Action & Earn XP</button>
-                    </form>
-                    <div id="action-result" class="result hidden" aria-live="polite" aria-atomic="true"></div>
-                </section>
+                <!-- Log Actions & Emissions Grid -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+                    
+                    <!-- Positive Actions -->
+                    <section class="card glass">
+                        <h2>Log Sustainable Action</h2>
+                        <form id="action-form">
+                            <div class="input-group">
+                                <label for="action-type">Action</label>
+                                <select id="action-type">
+                                    <option value="used_reusable_bag">Used a Reusable Bag</option>
+                                    <option value="planted_tree">Planted a Tree</option>
+                                    <option value="avoided_meat">Had a Meatless Meal</option>
+                                    <option value="used_public_transport">Took Public Transit</option>
+                                    <option value="reduced_heating">Reduced Heating/AC</option>
+                                    <option value="air_dried_laundry">Air-Dried Laundry</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn primary-btn">Log Action & Earn XP</button>
+                        </form>
+                        <div id="action-result" class="result hidden" aria-live="polite" aria-atomic="true"></div>
+                    </section>
+
+                    <!-- Daily Emissions -->
+                    <section class="card glass" style="border-left: 4px solid #ef4444;">
+                        <h2>Log Daily Footprint</h2>
+                        <p class="text-sm" style="color: #94a3b8; margin-bottom: 1rem;">Track your emissions to see your Analytics chart update.</p>
+                        <form id="emission-form">
+                            <div class="input-group">
+                                <label for="emission-category">Category</label>
+                                <select id="emission-category" onchange="toggleEmissionInputs()">
+                                    <option value="diet">Diet (Meal)</option>
+                                    <option value="commute">Commute (Transport)</option>
+                                    <option value="energy">Home Energy</option>
+                                </select>
+                            </div>
+                            
+                            <!-- Diet Inputs -->
+                            <div id="input-diet" class="emission-inputs">
+                                <div class="input-group">
+                                    <label for="emission-diet-type">Meal Type</label>
+                                    <select id="emission-diet-type">
+                                        <option value="beef">Beef / Heavy Meat</option>
+                                        <option value="chicken">Chicken / Pork</option>
+                                        <option value="fish">Fish</option>
+                                        <option value="vegetarian">Vegetarian</option>
+                                        <option value="vegan">Vegan</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <!-- Commute Inputs -->
+                            <div id="input-commute" class="emission-inputs hidden">
+                                <div class="input-group">
+                                    <label for="emission-commute-mode">Transport Mode</label>
+                                    <select id="emission-commute-mode">
+                                        <option value="driving">Driving (Car)</option>
+                                        <option value="transit">Public Transit</option>
+                                        <option value="bicycling">Bicycling</option>
+                                        <option value="walking">Walking</option>
+                                    </select>
+                                </div>
+                                <div class="input-group">
+                                    <label for="emission-commute-dist">Distance (km)</label>
+                                    <input type="number" id="emission-commute-dist" value="10" min="1">
+                                </div>
+                            </div>
+
+                            <!-- Energy Inputs -->
+                            <div id="input-energy" class="emission-inputs hidden">
+                                <div class="input-group">
+                                    <label for="emission-energy-elec">Electricity (kWh)</label>
+                                    <input type="number" id="emission-energy-elec" value="5" min="0">
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn primary-btn" style="background: #ef4444;">Log Emission</button>
+                        </form>
+                        <div id="emission-result" class="result hidden" aria-live="polite" aria-atomic="true"></div>
+                    </section>
+
+                </div>
 
                 <!-- AI Insights -->
                 <section class="card glass ai-section">
                     <h2>Gemini AI Insights</h2>
+                    <div style="margin-bottom: 10px;">
+                        <select id="insight-category" style="padding: 5px; border-radius: 5px; background: rgba(0,0,0,0.5); color: white; border: 1px solid #4ade80;">
+                            <option value="">General Habits</option>
+                            <option value="diet">Diet Hacks</option>
+                            <option value="transport">Transport Hacks</option>
+                            <option value="energy">Energy Hacks</option>
+                        </select>
+                    </div>
                     <button id="get-insight-btn" class="btn ai-btn">Generate Tip</button>
                     <div id="ai-loading" class="hidden">Gemini is thinking...</div>
                     <div id="insight-box" class="insight-content hidden" aria-live="polite" aria-atomic="true">
@@ -103,6 +216,30 @@
                             <p id="ai-tip">Your tip will appear here.</p>
                         </div>
                     </div>
+                </section>
+            </div>
+        </div>
+
+        <!-- ANALYTICS TAB -->
+        <div id="tab-analytics" class="tab-content" role="tabpanel" aria-label="Analytics">
+            <header>
+                <h1>Analytics & 3D Impact</h1>
+                <p>Explore your footprint data in real-time to understand your environmental impact.</p>
+            </header>
+            <div class="main-columns">
+                <section class="card glass">
+                    <h2>Emissions Breakdown</h2>
+                    <div style="position: relative; height:300px; width:100%">
+                        <canvas id="emissionsChart" role="img" aria-label="Donut chart showing emissions breakdown by Diet, Transport, and Energy"></canvas>
+                    </div>
+                </section>
+                <section class="card glass">
+                    <h2>Your 3D Eco-World</h2>
+                    <div id="three-container" class="three-container" role="img" aria-label="3D rendering of the Earth that changes color and size based on your carbon footprint" style="width:100%; height:300px; background: rgba(0,0,0,0.5); border-radius:10px;"></div>
+                    <div id="eco-world-status" aria-live="polite" aria-atomic="true" style="text-align: center; margin-top: 1rem; font-weight: 600; font-size: 1.1rem;"></div>
+                    <p class="text-sm" style="color: #94a3b8; text-align: center; margin-top: 0.5rem; max-width: 80%; margin-left: auto; margin-right: auto;">
+                        This living planet reacts to your 30-day carbon footprint. High emissions cause it to shrink and turn red. Log sustainable actions to help it heal!
+                    </p>
                 </section>
             </div>
         </div>
@@ -143,6 +280,23 @@
 
     </main>
 
-    <script src="app.js"></script>
+    <!-- Floating Chatbot Widget -->
+    <div id="chatbot-widget" class="chatbot-widget">
+        <div class="chatbot-header" role="button" aria-expanded="false" aria-controls="chatbot-body" tabindex="0" onclick="toggleChat()">
+            🤖 EcoBot
+        </div>
+        <div class="chatbot-body hidden" id="chatbot-body">
+            <div id="chat-messages" class="chat-messages" aria-live="polite">
+                <div class="msg ai">Hi! I can estimate the footprint of anything. Just ask! (e.g. "I ate a beef burger")</div>
+            </div>
+            <form id="chat-form" style="display:flex;">
+                <label for="chat-input" class="sr-only">Type a message</label>
+                <input type="text" id="chat-input" aria-label="Chat message input" placeholder="Type a message..." required style="flex-grow:1; padding:10px; border:none; background: #333; color: white;">
+                <button type="submit" class="btn primary-btn" style="padding:10px;">Send</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="app.js?v=11"></script>
 </body>
 </html>

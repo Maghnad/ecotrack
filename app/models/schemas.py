@@ -166,6 +166,29 @@ class InsightResponse(BaseModel):
     generated_at: str
 
 
+class ChatRequest(BaseModel):
+    message: str = Field(..., description="User's natural language message to the AI chatbot.")
+
+
+class ChatResponse(BaseModel):
+    reply: str
+    carbon_emissions_kg: float
+    message: str
+
+
+class BaselineRequest(BaseModel):
+    diet_type: Literal["vegan", "vegetarian", "pescatarian", "meat_average", "meat_heavy"]
+    commute_method: Literal["driving", "transit", "cycling", "walking", "remote"]
+    home_energy: Literal["renewable", "grid_average", "coal_heavy"]
+
+
+class BaselineResponse(BaseModel):
+    baseline_yearly_kg: float
+    message: str
+    xp_awarded: int
+    new_total_xp: int
+
+
 # ---------------------------------------------------------------------------
 # Carbon History & Analytics
 # ---------------------------------------------------------------------------
