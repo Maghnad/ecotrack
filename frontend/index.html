@@ -84,6 +84,10 @@
         </ul>
         <div class="user-profile">
             <div class="avatar">👤</div>
+            <div class="log-actions mt-4 flex" style="gap: 1rem;">
+                <button class="btn primary-btn flex-grow" onclick="document.getElementById('log-modal').classList.remove('hidden')">➕ Log Manual Action</button>
+                <button class="btn" style="background:#0ea5e9; color:white; border:none;" onclick="alert('Plaid Bank Connection (Mock): Scanning recent transactions... \nFound: Flight to NYC (+250kg CO2) \nFound: Vegan Groceries (+12kg CO2)')">🔗 Connect Bank (Auto-Track)</button>
+            </div>
             <div class="info">
                 <p id="user-email">Loading...</p>
                 <p id="user-level" class="level-badge">Lvl 1</p>
