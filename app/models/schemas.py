@@ -17,9 +17,9 @@ from pydantic import BaseModel, Field
 class CommuteLogRequest(BaseModel):
     """A single commute entry to log and calculate emissions for."""
 
-    origin_address: str = Field(...,
+    origin_address: str = Field(..., max_length=200,
                                 description="Starting point of the commute.")
-    destination_address: str = Field(...,
+    destination_address: str = Field(..., max_length=200,
                                      description="End point of the commute.")
     transport_mode: Literal["driving", "transit", "bicycling", "walking"] = Field(
         ..., description="Mode of transport used for this commute."
@@ -217,7 +217,7 @@ class EcoActionResponse(BaseModel):
 
 
 class FriendInviteRequest(BaseModel):
-    friend_email: str
+    friend_email: str = Field(..., max_length=200, description="Email of the friend to invite.")
 
 
 class FriendComparisonResponse(BaseModel):
