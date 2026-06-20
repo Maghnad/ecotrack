@@ -33,6 +33,20 @@ async function loadProfile() {
     }
 }
 
+function shareAchievement() {
+    var userLevelEl = document.getElementById('user-level');
+    var statEmissionsEl = document.getElementById('stat-emissions');
+    
+    var level = userLevelEl ? userLevelEl.innerText : "Eco Warrior";
+    var saved = statEmissionsEl ? statEmissionsEl.innerText : "some carbon";
+    
+    var text = encodeURIComponent(`I'm officially a ${level} on EcoTrack! 🌍 I've achieved ${saved} so far! Track your footprint and offset your emissions with me.`);
+    var url = encodeURIComponent(`https://ecotrack.example.com`);
+    
+    var twitterUrl = `https://twitter.com/intent/tweet?text=${text}&url=${url}`;
+    window.open(twitterUrl, '_blank', 'noopener,noreferrer');
+}
+
 // --- Navigation ---
 function switchTab(tabId) {
     document.querySelectorAll('.tab-content').forEach(function(el) {
