@@ -259,3 +259,26 @@ select option { background: var(--bg-color); }
     font-size: 1.1rem; text-align: center;
 }
 .login-card input:focus { outline: none; border-color: var(--accent-glow); }
+
+/* Accessibility Improvements */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+}
+
+:focus-visible {
+    outline: 2px solid var(--accent-glow);
+    outline-offset: 3px;
+}
+
+.login-card input:focus-visible, select:focus-visible {
+    outline: 2px solid var(--accent-glow);
+    outline-offset: 2px;
+}
