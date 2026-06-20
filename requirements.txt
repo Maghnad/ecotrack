@@ -8,3 +8,4 @@ google-cloud-firestore>=2.15.0
 google-cloud-secret-manager>=2.18.0
 requests>=2.31.0
 pytest>=8.0.0
+slowapi>=0.1.9

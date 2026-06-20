@@ -3,9 +3,16 @@ EcoTrack - Main Application Entry Point
 Assembles all routers and starts the FastAPI app.
 """
 
+import json
+import logging
+import time
+
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+from slowapi.util import get_remote_address
 
 from app.api import actions, footprint, users
 
@@ -24,6 +31,19 @@ app = FastAPI(
     license_info={"name": "MIT"},
 )
 
+# Configure Rate Limiter (100 requests per minute)
+limiter = Limiter(key_func=get_remote_address, default_limits=["100/minute"])
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+# Configure JSON Audit Logger for SIEM integration
+audit_logger = logging.getLogger("audit_log")
+audit_logger.setLevel(logging.INFO)
+if not audit_logger.handlers:
+    ch = logging.StreamHandler()
+    ch.setFormatter(logging.Formatter('%(message)s'))
+    audit_logger.addHandler(ch)
+
 # Allow frontend apps to call the API
 app.add_middleware(
     CORSMiddleware,
@@ -38,6 +58,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 @app.middleware("http")
 async def add_security_headers(request: Request, call_next):
     response = await call_next(request)
@@ -45,6 +66,34 @@ async def add_security_headers(request: Request, call_next):
     response.headers["X-Frame-Options"] = "DENY"
     response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
     response.headers["Content-Security-Policy"] = "default-src 'self'"
+    return response
+
+
+@app.middleware("http")
+async def audit_logging_middleware(request: Request, call_next):
+    start_time = time.time()
+    response = await call_next(request)
+    process_time = time.time() - start_time
+
+    # Extract UID from token if available
+    auth_header = request.headers.get("Authorization", "")
+    uid = "anonymous"
+    if auth_header.startswith("Bearer mock_token_"):
+        uid = f"uid_{auth_header.split('mock_token_')[1]}"
+    elif auth_header == "Bearer mock_token":
+        uid = "mock_user_123"
+
+    audit_event = {
+        "timestamp": time.time(),
+        "event_type": "HTTP_REQUEST",
+        "method": request.method,
+        "path": request.url.path,
+        "client_ip": request.client.host if request.client else "unknown",
+        "user_uid": uid,
+        "status_code": response.status_code,
+        "latency_ms": round(process_time * 1000, 2)
+    }
+    audit_logger.info(json.dumps(audit_event))
     return response
 
 # Register routers
