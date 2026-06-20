@@ -21,7 +21,7 @@ class CommuteLogRequest(BaseModel):
                                 description="Starting point of the commute.")
     destination_address: str = Field(..., max_length=200,
                                      description="End point of the commute.")
-    transport_mode: Literal["driving", "transit", "bicycling", "walking"] = Field(
+    transport_mode: Literal["driving", "transit", "bicycling", "walking", "flight"] = Field(
         ..., description="Mode of transport used for this commute."
     )
     date: Optional[str] = Field(

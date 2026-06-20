@@ -17,10 +17,11 @@ settings = get_settings()
 
 # Transport: kg CO₂ per km per person
 TRANSPORT_EMISSION_FACTORS: dict[str, float] = {
-    "driving": 0.171,  # Average petrol car, DEFRA 2023
-    "transit": 0.089,  # UK average bus
-    "bicycling": 0.000,  # Zero operational emissions
-    "walking": 0.000,
+    "driving": 0.192,  # kg CO2 per km (average petrol car)
+    "transit": 0.041,  # kg CO2 per km (average bus/train)
+    "bicycling": 0.0,
+    "walking": 0.0,
+    "flight": 0.255,  # kg CO2 per km (high altitude radiative forcing)
 }
 
 # Diet: kg CO₂e per serving
@@ -117,13 +118,25 @@ def emissions_to_driving_equivalent_km(carbon_kg: float) -> float:
 # ---------------------------------------------------------------------------
 
 
+def _sanitise_address(address: str) -> str:
+    """Removes control characters and limits length to prevent injection attacks."""
+    if not address:
+        return ""
+    # Strip non-printable characters and limit to 100 chars
+    clean = "".join(char for char in address if char.isprintable())
+    return clean[:100].strip()
+
+
 def _get_distance_km(origin: str, destination: str, mode: str) -> float:
     """
     Calls Google Maps Distance Matrix API.
     Returns a deterministic mock distance in testing mode.
     """
+    safe_origin = _sanitise_address(origin)
+    safe_dest = _sanitise_address(destination)
+
     if settings.environment == "testing" or settings.google_maps_api_key == "mock_key":
-        return _mock_distance(origin, destination)
+        return _mock_distance(safe_origin, safe_dest)
 
     import googlemaps
 

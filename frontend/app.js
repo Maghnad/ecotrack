@@ -159,12 +159,49 @@ async function loadAnalytics() {
                     borderColor: '#0f172a'
                 }]
             },
-            options: { responsive: true, maintainAspectRatio: false }
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { color: '#cbd5e1' }
+                    }
+                }
+            }
         });
 
-        initThreeJS(history.period_total_kg);
+        var totalEmissions = totalDiet + totalTransport + totalEnergy;
+        initThreeJS(totalEmissions);
+        updateBudgetUI(totalEmissions);
+
     } catch (err) {
-        console.error("Analytics error:", err);
+        console.error("Failed to load analytics:", err);
+    }
+}
+
+function updateBudgetUI(totalEmissions) {
+    var budgetUsedText = document.getElementById('budget-used-text');
+    var budgetProgressBar = document.getElementById('budget-progress-bar');
+    var budgetWarning = document.getElementById('budget-warning');
+    
+    if (!budgetUsedText || !budgetProgressBar) return;
+    
+    var budgetTotal = 200; // Hardcoded monthly budget goal for now
+    var percentUsed = Math.min((totalEmissions / budgetTotal) * 100, 100);
+    
+    budgetUsedText.innerText = totalEmissions.toFixed(1) + " kg used";
+    budgetProgressBar.style.width = percentUsed + "%";
+    
+    if (percentUsed >= 90) {
+        budgetProgressBar.style.background = "#ef4444"; // Red
+        if (budgetWarning) budgetWarning.style.display = "block";
+    } else if (percentUsed >= 75) {
+        budgetProgressBar.style.background = "#f59e0b"; // Orange
+        if (budgetWarning) budgetWarning.style.display = "none";
+    } else {
+        budgetProgressBar.style.background = "#10b981"; // Green
+        if (budgetWarning) budgetWarning.style.display = "none";
     }
 }
 
